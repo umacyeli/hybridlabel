@@ -4,6 +4,7 @@
 #include<map>
 #include<unordered_set>
 #include<unordered_map>
+#include<queue>
 
 using namespace std;
 
@@ -25,17 +26,25 @@ private:
 	int weighted;//0: unweighted 1: weighted
 	int directed;//0: undirected 1: directed
 
-	int V;
 	vector<set<int> > hneighbors;
 	vector<set<int> > hreach;
 	vector<int> drank;//drank[v] = rank. get rank of a vertice v
 	vector<int> dorder;//dorder[r] = v. get vertice by its rank.
 	vector<vector<int> > label;
 	vector<vector<int> > labeld;
-	vector<vector<int> > nlabel;
+	vector<vector<int> > nlabel;//links+shortcuts
 	vector<vector<int> > nlabeld;
 	vector<vector<int> > hidden_label;
 	vector<vector<int> > hidden_labeld;
+	vector<vector<int> > glabel;//guidences
+	vector<vector<int> > glabeld;
+	vector<vector<int> > olabel;
+	vector<vector<int> > olabeld;
+
+
+	vector<int> com;
+	vector<vector<pair<int, int> > > plabel;
+	vector<set<int> > pset;
 	int olabel_amount;	
 
 	string graphFile;//path to the given graph file
@@ -46,13 +55,19 @@ private:
 	string hash_edge(pair<int, int> se);
 
 public:
+	int rv;
+	int V;
 	Graph(string graphFile, int weighted, int directed);
 	int read();
 	int loadLabel(const char* filename);
 	int loadRankOrder(const char* filename);
-	int compresslabel(const char* filename);
+	int compressLabel(const char* filename);
+	int decomposeLabel();
 	int loadNewlabel(const char* filename);
 	int QueryNewLabel(int u, int v);
+	int lightenLabel(int v, int num);
+	int query(int u, int v);
+	int pllquery(int u, int v);
 	/*
 	int triade(double ep);
 	int init(unordered_set<int> &dirty);	
