@@ -1,0 +1,105 @@
+//
+//  main.cpp
+//  hybridLabeling
+//
+//  Created by Jagsly on 7/13/15.
+//  Copyright (c) 2015 Jagsly. All rights reserved.
+//
+
+#include <stdio.h>
+#include "HLabel.h"
+#include<iostream>
+#include <sys/time.h>
+
+using namespace std;
+int main(int argc, const char * argv[]) {
+    HLabel hlabel;
+    
+    string indexFile = "/Users/jagsly/Downloads/graph_data/advogato/out.advogato.intweight.label.ppll_weighted";
+    string rankFile = "/Users/jagsly/Downloads/graph_data/advogato/out.advogato.intweight.label.ppll_weighted.drank";
+    string fanoutFile = "/Users/jagsly/Downloads/graph_data/advogato/stats/fanout";
+    
+    vector<vector<flabel> > fullindex;
+    vector<vector<label> > invertedindex;
+    hlabel.load(indexFile, fullindex);
+    hlabel.loadRank(rankFile);
+    
+    hlabel.full2invert(fullindex, invertedindex);
+    hlabel.full2pll(fullindex);
+    
+    hlabel.fanouttest(fanoutFile);
+    
+    int remove_rank = 120;
+    for(int i = 0; i < remove_rank ; i++){
+        int topv = hlabel.inv[i];//get the top vertice
+//        double hitrate = hlabel.hittest(topv, invertedindex, 1);
+   
+        hlabel.removelabel(topv, fullindex, invertedindex);
+        
+        /*
+         hlabel.full2compact(fullindex);
+   
+         srand(10);
+         int s = rand()%hlabel.V;
+         int t = rand()%hlabel.V;
+    
+         // hlabel.initialization();
+         //hlabel.query(s, t);
+         //hlabel.pllquery(s, t);
+         */
+        /*
+        cout << "remove " << topv << endl;
+        cout << "hit rate " << hitrate << endl;
+         */
+       // cout << "reduce label " << hlabel.RL << endl;
+        //cout << "amount label " << hlabel.L << endl;
+        
+    //    int tnr_num = hlabel.parents_distribution(remove_rank);
+  //      cout << tnr_num * tnr_num << endl;
+        
+    }
+    
+    
+//   int tnr_num = hlabel.parents_distribution(remove_rank);
+    
+    hlabel.full2compact(fullindex);
+    
+    hlabel.parents_fanout_distribution(remove_rank);
+    
+    srand(100);
+    
+    hlabel.initialization();
+    
+    int times = 1000;
+    double ourt = 0;
+    double pllt = 0;
+    double ourthis = 0;
+    double pllthis = 0;
+    
+    struct timeval start,stop1,stop2;
+    for(int i = 0; i < times; i++){
+        int s = rand()%hlabel.V;
+        int t = rand()%hlabel.V;
+        gettimeofday(&start, NULL);
+        int our = hlabel.query(s, t);
+        gettimeofday(&stop1, NULL);
+        ourt += (stop1.tv_sec - start.tv_sec)*1000000 + stop1.tv_usec - start.tv_usec;
+        ourthis = (stop1.tv_sec - start.tv_sec)*1000000 + stop1.tv_usec - start.tv_usec;
+        
+        gettimeofday(&start, NULL);
+        int pll = hlabel.pllquery(s, t);
+        gettimeofday(&stop2, NULL);
+        pllt += (stop2.tv_sec - start.tv_sec)*1000000 + stop2.tv_usec - start.tv_usec;
+        pllthis = (stop2.tv_sec - start.tv_sec)*1000000 + stop2.tv_usec - start.tv_usec;
+        
+      //  cout << "our time=" << ourthis << ", pll tim" << pllthis << " , our result=" << our << ", pll result=" << pll << endl;
+       
+     //   if(pll != our )
+       //     cout << "s:" << s << " t:" << t << " pll=" << pll << " our=" << our << endl;
+        
+    }
+    
+    cout << ourt/times << " : " << pllt/times << endl;
+    
+    return 0;
+}
